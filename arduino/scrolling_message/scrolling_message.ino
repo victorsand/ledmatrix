@@ -91,15 +91,16 @@ void updateScroll() {
   }
 }
 
-void loop() {
-  
-  if (Serial.available())
-  {
+void readSerial() {
+  if (Serial.available()) {
      selectMessage(Serial.read() - '0');
      resetScroll();
-  }
-  
+  }  
+}
+
+void loop() {
   matrix.fillScreen(0);
+  readSerial();
   updateScroll();
   printMessage(message_offset_x, matrix.Color333(5, 5, 5));
   drawBorder(matrix.Color333(7, 0, 0));
