@@ -39,7 +39,12 @@ const int strlen_table[] PROGMEM = {
 elapsedMillis time_elapsed = 0;
 
 int message_index;
+int border_color;
 char character;
+
+int border_r = 1;
+int border_g = 1;
+int border_b = 1;
 
 int message_length;
 int message_offset_x;
@@ -93,7 +98,14 @@ void updateScroll() {
 
 void readSerial() {
   if (Serial.available()) {
-     selectMessage(Serial.read() - '0');
+     int index = Serial.read() - '0';
+     delay(100);
+     border_r = Serial.read();
+     delay(100);
+     border_g = Serial.read();
+     delay(100);
+     border_b = Serial.read();
+     selectMessage(index);
      resetScroll();
   }  
 }
@@ -102,7 +114,7 @@ void loop() {
   matrix.fillScreen(0);
   readSerial();
   updateScroll();
-  printMessage(message_offset_x, matrix.Color333(5, 5, 5));
-  drawBorder(matrix.Color333(7, 0, 0));
+  printMessage(message_offset_x, matrix.Color333(1, 1, 1));
+  drawBorder(matrix.Color333(border_r, border_g, border_b));
   matrix.swapBuffers(false);
 }
