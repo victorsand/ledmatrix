@@ -19,18 +19,21 @@ const int DRAW_DELAY = 100; // milliseconds
 
 const char message_0[] PROGMEM = "Hello";
 const char message_1[] PROGMEM = "OK!";
-const char message_2[] PROGMEM = "Some really long string that would not fit in SRAM";
+const char message_2[] PROGMEM = "Another string";
+const char message_3[] PROGMEM = "More strings";
 
-const char* const message_table[] PROGMEM = {
+const char * const message_table[] PROGMEM = {
   message_0,
   message_1,
-  message_2
+  message_2,
+  message_3
 };
 
-const int strlen_table[] = {
-  strlen_P(message_0),
-  strlen_P(message_1),
-  strlen_P(message_2)
+const int strlen_table[] PROGMEM = {
+  5,
+  3,
+  14,
+  12
 };
 
 elapsedMillis time_elapsed = 0;
@@ -44,7 +47,7 @@ int min_offset_x;
 
 void selectMessage(int index) {
   message_index = index;
-  message_length = strlen_table[message_index];
+  message_length = (int)pgm_read_word(&strlen_table[message_index]);
   min_offset_x = message_length * TEXT_WIDTH * -1;
 }
 
@@ -83,7 +86,7 @@ void updateScroll() {
 }
 
 void loop() {
-  selectMessage(0);
+  selectMessage(2);
   matrix.fillScreen(0);
   updateScroll();
   printMessage(message_offset_x, matrix.Color333(5, 5, 5));
