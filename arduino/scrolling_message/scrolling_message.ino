@@ -17,7 +17,7 @@ const int TEXT_SIZE = 1;
 const int TEXT_WIDTH = 6; // width of font + one whitespace
 const int DRAW_DELAY = 100; // milliseconds
 
-const char message_0[] PROGMEM = "Hello";
+const char message_0[] PROGMEM = "Puss! <3";
 const char message_1[] PROGMEM = "OK!";
 const char message_2[] PROGMEM = "Another string";
 const char message_3[] PROGMEM = "More strings";
@@ -30,7 +30,7 @@ const char * const message_table[] PROGMEM = {
 };
 
 const int strlen_table[] PROGMEM = {
-  5,
+  8,
   3,
   14,
   12
@@ -69,10 +69,16 @@ void printMessage(int offsetX, int color) {
 }
 
 void setup() {
+  Serial.begin(9600);
   matrix.begin();
   matrix.setTextWrap(false);
   matrix.setTextSize(TEXT_SIZE);
-  
+  selectMessage(0);
+}
+
+void resetScroll() {
+  time_elapsed = 0;
+  message_offset_x = WIDTH;  
 }
 
 void updateScroll() {
@@ -86,7 +92,13 @@ void updateScroll() {
 }
 
 void loop() {
-  selectMessage(2);
+  
+  if (Serial.available())
+  {
+     selectMessage(Serial.read() - '0');
+     resetScroll();
+  }
+  
   matrix.fillScreen(0);
   updateScroll();
   printMessage(message_offset_x, matrix.Color333(5, 5, 5));
