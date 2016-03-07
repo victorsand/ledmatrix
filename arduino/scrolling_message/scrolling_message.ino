@@ -3,7 +3,7 @@
 #include <RGBmatrixPanel.h>
 #include <elapsedMillis.h>
 
-#define CLK 8  // MUST be on PORTB! (Use pin 11 on Mega)
+#define CLK 11  // MUST be on PORTB! (Use pin 11 on Mega)
 #define LAT A3
 #define OE  9
 #define A   A0
@@ -16,74 +16,54 @@ const int HEIGHT = 16;
 const int TEXT_SIZE = 1;
 const int TEXT_WIDTH = 6; // width of font + one whitespace
 const int DRAW_DELAY = 100; // milliseconds
+const int MESSAGE_BUFFER_LENGTH = 128;
+const int BAUD_RATE = 9600;
 
-const char message_0[] PROGMEM = "Puss! <3";
-const char message_1[] PROGMEM = "OK!";
-const char message_2[] PROGMEM = "Another string";
-const char message_3[] PROGMEM = "More strings";
-
-const char * const message_table[] PROGMEM = {
-  message_0,
-  message_1,
-  message_2,
-  message_3
-};
-
-const int strlen_table[] PROGMEM = {
-  8,
-  3,
-  14,
-  12
-};
-
-elapsedMillis time_elapsed = 0;
-
-int message_index;
-int border_color;
-char character;
-
-int border_r = 1;
-int border_g = 1;
-int border_b = 1;
+char message_buffer[MESSAGE_BUFFER_LENGTH];
 
 int message_length;
 int message_offset_x;
 int min_offset_x;
 
-void selectMessage(int index) {
-  message_index = index;
-  message_length = (int)pgm_read_word(&strlen_table[message_index]);
-  min_offset_x = message_length * TEXT_WIDTH * -1;
-}
+elapsedMillis time_elapsed = 0;
 
-void drawBorder(int color) {
+int border_r;
+int border_g;
+int border_b;
+
+int message_r;
+int message_g;
+int message_b;
+
+void drawBorder() {
+  int color = matrix.Color333(border_r, border_g, border_b);
   matrix.drawLine(0, 0, WIDTH-1, 0, color);
   matrix.drawLine(0, 0, 0, HEIGHT-1, color);
   matrix.drawLine(0, HEIGHT-1, WIDTH-1, HEIGHT-1, color);
   matrix.drawLine(WIDTH-1, 0, WIDTH-1, HEIGHT-1, color);
 }
 
-void printMessage(int offsetX, int color) {
-  matrix.setTextColor(color);
-  matrix.setCursor(offsetX, 4);
-  PGM_P prog_ptr = (prog_char*)pgm_read_word(&message_table[message_index]);
+void drawMessage() { 
+  matrix.setTextColor(matrix.Color333(message_r, message_g, message_b));
+  matrix.setCursor(message_offset_x, 4);
+  int message_length = MESSAGE_BUFFER_LENGTH;
+  char character;
   for (int i=0; i<message_length; i++) {
-    character = (char)pgm_read_byte(&prog_ptr[i]);
+    character = message_buffer[i];
     matrix.print(character);
   }
 }
 
-void setup() {
-  Serial.begin(9600);
-  matrix.begin();
-  matrix.setTextWrap(false);
-  matrix.setTextSize(TEXT_SIZE);
-  selectMessage(0);
-}
-
-void resetScroll() {
-  time_elapsed = 0;
-  message_offset_x = WIDTH;  
+void initMessageAndColors() {
+  message_buffer[0] = '?';
+  message_length = 1;
+  updateMinOffsetX();
+  message_r = 3;
+  message_g = 3;
+  message_b = 3;
+  border_r = 0;
+  border_g = 3;
+  border_b = 0;
 }
 
 void updateScroll() {
@@ -96,25 +76,49 @@ void updateScroll() {
   }
 }
 
+void resetScroll() {
+  time_elapsed = 0;
+  message_offset_x = WIDTH;  
+}
+
+void updateMinOffsetX() {
+  min_offset_x = message_length * TEXT_WIDTH * -1;
+}
+
 void readSerial() {
   if (Serial.available()) {
-     int index = Serial.read() - '0';
-     delay(100);
-     border_r = Serial.read();
-     delay(100);
-     border_g = Serial.read();
-     delay(100);
-     border_b = Serial.read();
-     selectMessage(index);
-     resetScroll();
+    message_r = Serial.read() - '0';
+    delay(100);
+    message_g = Serial.read() - '0';
+    delay(100);
+    message_b = Serial.read() - '0';
+    delay(100);
+    border_r = Serial.read() - '0';
+    delay(100);
+    border_g = Serial.read() - '0';
+    delay(100);
+    border_b = Serial.read() - '0';
+    message_length = Serial.readBytesUntil('\0', message_buffer, MESSAGE_BUFFER_LENGTH);
+    updateMinOffsetX();
+    resetScroll();
   }  
+}
+
+void setup() {
+  delay(1000);
+  initMessageAndColors();
+  Serial.begin(BAUD_RATE);
+  matrix.begin();
+  matrix.setTextWrap(false);
+  matrix.setTextSize(TEXT_SIZE);   
 }
 
 void loop() {
   matrix.fillScreen(0);
   readSerial();
   updateScroll();
-  printMessage(message_offset_x, matrix.Color333(1, 1, 1));
-  drawBorder(matrix.Color333(border_r, border_g, border_b));
+  drawMessage();
+  drawBorder();
   matrix.swapBuffers(false);
 }
+
