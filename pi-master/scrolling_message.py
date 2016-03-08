@@ -2,7 +2,7 @@ import serial
 import sys
 import re
 
-ser = serial.Serial('/dev/ttyACM1', 9600)
+ser = serial.Serial('/dev/ttyACM0', 9600)
 
 if len(sys.argv) != 4:
     print "Too many arguments"
