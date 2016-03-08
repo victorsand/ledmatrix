@@ -29,7 +29,7 @@ router.post("/scrolling", function(req, res) {
 			}
 			if (error) {
 				console.error("exec error:", error);
-				res.sendStatus(500);
+				res.status(500).send(stdout + " " + stderr);
 			}
 			res.send(200);
 		});

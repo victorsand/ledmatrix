@@ -46,7 +46,6 @@ void drawBorder() {
 void drawMessage() { 
   matrix.setTextColor(matrix.Color333(message_r, message_g, message_b));
   matrix.setCursor(message_offset_x, 4);
-  int message_length = MESSAGE_BUFFER_LENGTH;
   char character;
   for (int i=0; i<message_length; i++) {
     character = message_buffer[i];
