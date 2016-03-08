@@ -35,13 +35,13 @@ router.post("/scrolling", function(req, res) {
 		var borderColor = req.param("borderColor") || req.body.borderColor;
 		var message = req.param("message") || req.body.message;
 
-		message = message.replace(/'|"/g, "");
-
 		if (!messageColor || !borderColor || !message) {
 			console.error("Param(s) missing");
 			res.status(500).send("Missing one or more paramers");
 			return;
 		}
+
+		message = message.replace(/'|"/g, "");
 
 		params = buildScrollingMessageParams(messageColor, borderColor, message);
 		console.log("Message params:", params);
