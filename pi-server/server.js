@@ -6,21 +6,34 @@ var port = 8080;
 
 var router = express.Router();
 
-router.get("/", function(req, res) {
-	console.log("GET /");
-	res.json({message: "Hello from the Pi"});
-});
-
 router.post("/scrolling", function(req, res) {
 	console.log("POST /scrolling");
-	exec("python ~/code/ledmatrix/pi-master/scrolling_message.py 510 005 Wazzaa", 
-			function(error, stdout, stderr) {
+
+	function buildScrollingMessageParams(messageColor, borderColor, message) {
+		return "python ../pi-master/scrolling_message.py " + 
+			messageColor + " " + borderColor + " " + message;
+	}
+
+	var messageColor = req.param("messageColor");
+	var borderColor = req.param("borderColor");
+	var message = req.param("message");
+
+	exec(
+		buildScrollingMessageParams(messageColor, borderColor, message),
+		function(error, stdout, stderr) {
+			if (stdout) {
 				console.log("stdout:", stdout);
+			}
+			if (stderr) {
 				console.log("stderr:", stderr);
-				if (error !== null) {
-					console.error("exec error:", error);
-				}
-	});
+			}
+			if (error) {
+				console.error("exec error:", error);
+				res.sendStatus(500);
+			}
+			res.send(200);
+		});
+
 });
 
 app.use("/matrix", router);
