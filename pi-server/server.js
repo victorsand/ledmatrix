@@ -16,27 +16,38 @@ router.post("/scrolling", function(req, res) {
 				req.connection.socket.remoteAddress;
 	console.log("Request from ip:", ip);
 
+	function buildMatrixAnimationParams() {
+		return "python ../pi-master/scrolling_message.py -matrix";
+	}
+
 	function buildScrollingMessageParams(messageColor, borderColor, message) {
-		return "python ../pi-master/scrolling_message.py " + 
+		return "python ../pi-master/scrolling_message.py -scroll " +
 			messageColor + " " + borderColor + " '" + message + "'";
 	}
 
-	var messageColor = req.param("messageColor") || req.body.messageColor;
-	var borderColor = req.param("borderColor") || req.body.borderColor;
-	var message = req.param("message") || req.body.message;
+	var modeParam = req.param("mode") || req.body.mode;
 
-	message = message.replace(/'|"/g, "");
+	var params;
+	if (modeParam == "matrix") {
+		params = buildMatrixAnimationParams();
+	} else { // scroll
+		var messageColor = req.param("messageColor") || req.body.messageColor;
+		var borderColor = req.param("borderColor") || req.body.borderColor;
+		var message = req.param("message") || req.body.message;
 
-	if (!messageColor || !borderColor || !message) {
-		console.error("Param(s) missing");
-		res.status(500).send("Missing one or more paramers");
-		return;
+		message = message.replace(/'|"/g, "");
+
+		if (!messageColor || !borderColor || !message) {
+			console.error("Param(s) missing");
+			res.status(500).send("Missing one or more paramers");
+			return;
+		}
+
+		params = buildScrollingMessageParams(messageColor, borderColor, message);
+		console.log("Message params:", params);
 	}
 
-	var messageParams = buildScrollingMessageParams(messageColor, borderColor, message);
-	console.log("Message params:", messageParams);
-
-	exec(messageParams, function(error, stdout, stderr) {
+	exec(params, function(error, stdout, stderr) {
 		if (stdout) {
 			console.log("stdout:", stdout);
 		}
