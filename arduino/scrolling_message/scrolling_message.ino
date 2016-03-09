@@ -90,7 +90,7 @@ void initMessageAndColors() {
 void resetScroll() {
   time_elapsed = 0;
   message_offset_x = WIDTH;  
-  draw_delay = 150;
+  draw_delay = 100;
 }
 
 void updateMinOffsetX() {
@@ -163,7 +163,10 @@ void initAnimationTopRow() {
 
 void updateScroll() {
   if (time_elapsed > draw_delay) {
-    message_offset_x = max(--message_offset_x, min_offset_x);
+    message_offset_x--;
+    if (message_offset_x < min_offset_x) {
+      message_offset_x = WIDTH;
+    } 
     time_elapsed = 0;
   }
 }
