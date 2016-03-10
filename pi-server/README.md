@@ -38,4 +38,37 @@ Removes a specific message from the queue.
 	recurringMessages: [Array with the recurring messages currently on the server],
 }
 ```
+
+### POST /showTemporaryMessage
+Shows a one-time message, and then goes back to looping recurring messages.
+
+#### Params:
+
+##### message
+*[Required]* Message to display. Max 512 characters, English charset.
+
+##### messageColor
+*[Required]* String with three RGB numbers, 0-7.
+
+##### borderColor
+*[Required]* String with three RGB numbers, 0-7.
+
+#### Returns:
+```
+200 OK
+```
+
+### GET /recurringMessages
+Returns a list of recurring messages.
+
+#### Params:
+(none)
+
+### Returns (JSON):
+```
+{
+	recurringMessages: [Array with the recurring messages currently on the server],
+}
+
+
 	

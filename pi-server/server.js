@@ -3,10 +3,11 @@ var app = express();
 var exec = require("child_process").exec;
 var bodyParser = require("body-parser");
 var uuid = require("node-uuid");
-
+var router = express.Router();
 var port = 3452;
 
-var router = express.Router();
+var RECURRING_INTERVAL = 30000;
+var TEMPORARY_MESSAGE_DURATION = 30000;
 
 function buildMatrixAnimationParams() {
 	return "python ../pi-master/scrolling_message.py -matrix";
@@ -18,6 +19,7 @@ function buildScrollingMessageParams(messageColor, borderColor, message) {
 }
 
 function showScrollingMessage(messageColor, borderColor, message) {
+	message = message.slice(0, Math.min(message.length, 512));
 	var params = buildScrollingMessageParams(messageColor, borderColor, message);
 	exec(params, function(error, stdout, stderr) {
 		if (stdout) {
@@ -47,12 +49,11 @@ function showMatrixAnimation() {
 	});
 }
 
-var RECURRING_INTERVAL = 10000;
 
 var recurringMessages = [];
 
 var index = 0;
-var recurringLoop = setInterval(function() {
+function loop() {
 	console.log("looping, index", index);
 	if (recurringMessages.length < 1) return;
 	showScrollingMessage(recurringMessages[index].messageColor,
@@ -63,7 +64,14 @@ var recurringLoop = setInterval(function() {
 		index = 0;
 	}
 	console.log("no reset, index", index);
-}, RECURRING_INTERVAL);
+}
+
+var recurringLoop;
+function restartLoop() {
+	clearInterval(recurringLoop);
+	recurringLoop = setInterval(loop, RECURRING_INTERVAL);
+	loop();
+}
 
 function findRecurringMessageIndex(message) {
 	for (var i=0; i<recurringMessages.length; i++) {
@@ -137,8 +145,13 @@ router.post("/addRecurringMessage", function(req, res) {
 
 	var id = addRecurringMessage(messageColor, borderColor, message);
 
+	if (recurringMessages.length == 1) {
+		restartLoop();
+	}
+
 	if (!id) {
 		res.status(400).json({ 
+			id: null,
 			error: "Message already exists", 
 			recurringMessages: recurringMessages
 		});
@@ -148,6 +161,7 @@ router.post("/addRecurringMessage", function(req, res) {
 	res.status(200).json({
 		id: id,
 		recurringMessages: recurringMessages,
+		error: null
 	});
 });
 
@@ -170,54 +184,57 @@ router.post("/removeRecurringMessage", function(req, res) {
 	});
 });
 
+router.post("/showTemporaryMessage", function(req, res) {
+	console.log("POST /showTemporaryMessage");
+	console.log(ipInfo(req));
 
-router.post("/scrolling", function(req, res) {
-	console.log("POST /scrolling");
+	var messageColor = req.param("messageColor") || req.body.messageColor;
+	var borderColor = req.param("borderColor") || req.body.borderColor;
+	var message = req.param("message") || req.body.message;
 
-
-	var modeParam = req.param("mode") || req.body.mode;
-
-	var params;
-	if (modeParam == "matrix") {
-		params = buildMatrixAnimationParams();
-	} else { // scroll
-		var messageColor = req.param("messageColor") || req.body.messageColor;
-		var borderColor = req.param("borderColor") || req.body.borderColor;
-		var message = req.param("message") || req.body.message;
-
-		if (!messageColor || !borderColor || !message) {
-			console.error("Param(s) missing");
-			res.status(500).send("Missing one or more paramers");
-			return;
-		}
-
-		message = message.replace(/'|"/g, "");
-
-		params = buildScrollingMessageParams(messageColor, borderColor, message);
-		console.log("Message params:", params);
+	if (!messageColor || !borderColor || !message) {
+		console.error("Param(s) missing");
+		res.status(400).send("Missing one or more paramers");
+		return;
 	}
 
-	exec(params, function(error, stdout, stderr) {
-		if (stdout) {
-			console.log("stdout:", stdout);
-		}
-		if (stderr) {
-			console.log("stderr:", stderr);
-		}
-		if (error) {
-			console.error("exec error:", error);
-			res.status(500).send(stdout + " " + stderr);
-		}
-		res.status(200).send("Thank you for your order");
-	});
+	clearInterval(recurringLoop);
 
+	showScrollingMessage(messageColor, borderColor, message);
+
+	setTimeout(function() {
+		restartLoop();
+	}, TEMPORARY_MESSAGE_DURATION);
+
+	res.status(200).send();
+	return;
 });
 
+router.get("/recurringMessages", function(req, res) {
+	console.log("GET /recurringMessages");
+	console.log(ipInfo(req));
+
+	res.status(200).json({
+		recurringMessages: recurringMessages
+	});
+	return;
+});
+
+
 app.use(bodyParser.urlencoded({extended: false}));
+
 app.use("/", router);
 
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
 app.listen(port);
+
 console.log("Server started on port", port);
+
 showMatrixAnimation();
 
 
