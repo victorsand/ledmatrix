@@ -6,8 +6,8 @@ var uuid = require("node-uuid");
 var router = express.Router();
 var port = 3452;
 
-var RECURRING_INTERVAL = 30000;
-var TEMPORARY_MESSAGE_DURATION = 30000;
+var RECURRING_INTERVAL = 60 * 1000;
+var TEMPORARY_MESSAGE_DURATION = 60 * 1000;
 
 function buildMatrixAnimationParams() {
 	return "python ../pi-master/scrolling_message.py -matrix";
@@ -18,57 +18,95 @@ function buildScrollingMessageParams(messageColor, borderColor, message) {
 		messageColor + " " + borderColor + " '" + message + "'";
 }
 
-function showScrollingMessage(messageColor, borderColor, message) {
+function cleanMessage(message) {
 	message = message.slice(0, Math.min(message.length, 512));
+	// Get rid of Swedish characters in charcode format
+	for (var i=0; i<message.length; i++) {
+		if (message.charCodeAt(i) === 229 || message.charCodeAt(i) === 228) {
+			message = message.substr(0, i) + "a" + message.substr(i + 1);
+		} else if (message.charCodeAt(i) === 246) {
+			message = message.substr(0, i) + "o" + message.substr(i + 1);
+		}
+	}
+	// Get rid of Swedish characters in HTML format
+	message = message.replace("&#229;", "a");
+	message = message.replace("&#228;", "a");
+	message = message.replace("&#246;", "o");
+	return message;
+}
+
+function showScrollingMessage(messageColor, borderColor, message) {
+	console.log("Showing scrolling message", message);
 	var params = buildScrollingMessageParams(messageColor, borderColor, message);
-	exec(params, function(error, stdout, stderr) {
-		if (stdout) {
-			console.log("stdout:", stdout);
-		}
-		if (stderr) {
-			console.log("stderr:", stderr);
-		}
-		if (error) {
-			console.error("exec error:", error);
-		}
-	});
+	try {
+		exec(params, function(error, stdout, stderr) {
+			if (stdout) {
+				console.log("stdout:", stdout);
+			}
+			if (stderr) {
+				console.log("stderr:", stderr);
+			}
+			if (error) {
+				console.error("exec error:", error);
+				return false;
+			}
+		});
+	} catch(e) {
+		console.log("Failed to execute");
+		console.log(e);
+		return false;
+	}
+	return true;
 }
 
 function showMatrixAnimation() {
+	console.log("Showing Matrix animation");
 	var params = buildMatrixAnimationParams();
-	exec(params, function(error, stdout, stderr) {
-		if (stdout) {
-			console.log("stdout:", stdout);
-		}
-		if (stderr) {
-			console.log("stderr:", stderr);
-		}
-		if (error) {
-			console.error("exec error:", error);
-		}
-	});
+	try {
+		exec(params, function(error, stdout, stderr) {
+			if (stdout) {
+				console.log("stdout:", stdout);
+			}
+			if (stderr) {
+				console.log("stderr:", stderr);
+			}
+			if (error) {
+				console.error("exec error:", error);
+				return false;
+			}
+		});
+	} catch(e) {
+		console.log("Failed to execute");
+		console.log(e);
+		return false;
+	}
+	return true;
 }
-
 
 var recurringMessages = [];
 
 var index = 0;
+
 function loop() {
-	console.log("looping, index", index);
 	if (recurringMessages.length < 1) return;
+	if (index > recurringMessages.length-1) {
+		console.log("ERROR - someting went wrong with the index");
+		return;
+	}
 	showScrollingMessage(recurringMessages[index].messageColor,
 						 recurringMessages[index].borderColor,
 						 recurringMessages[index].message);
-	if (++index > recurringMessages.length-1) {
-		console.log("resetting index");
+	index++;
+	if (index > recurringMessages.length-1) {
 		index = 0;
 	}
-	console.log("no reset, index", index);
 }
 
 var recurringLoop;
 function restartLoop() {
+	console.log("Restarting loop");
 	clearInterval(recurringLoop);
+	index = 0;
 	recurringLoop = setInterval(loop, RECURRING_INTERVAL);
 	loop();
 	if (recurringMessages.length < 1) {
@@ -95,6 +133,7 @@ function findRecurringMessageIndexById(id) {
 }
 
 function addRecurringMessage(messageColor, borderColor, message) {
+	console.log("Adding recurring message", message);
 	if (findRecurringMessageIndex(message) !== null) {
 		console.log("Message already exists");
 		return null;
@@ -146,6 +185,8 @@ router.post("/addRecurringMessage", function(req, res) {
 		return;
 	}
 
+	message = cleanMessage(message);
+
 	var id = addRecurringMessage(messageColor, borderColor, message);
 
 	if (recurringMessages.length == 1) {
@@ -153,7 +194,7 @@ router.post("/addRecurringMessage", function(req, res) {
 	}
 
 	if (!id) {
-		res.status(400).json({ 
+		res.status(200).json({ 
 			id: null,
 			error: "Message already exists", 
 			recurringMessages: recurringMessages
@@ -197,39 +238,42 @@ router.post("/showTemporaryMessage", function(req, res) {
 
 	if (!messageColor || !borderColor || !message) {
 		console.error("Param(s) missing");
-		res.status(400).send("Missing one or more paramers");
+		res.status(400).send({ error: "Missing one or more parameters" });
 		return;
 	}
 
+	message = cleanMessage(message);
+
 	clearInterval(recurringLoop);
 
-	showScrollingMessage(messageColor, borderColor, message);
+	var result = showScrollingMessage(messageColor, borderColor, message);
 
-	setTimeout(function() {
-		restartLoop();
-	}, TEMPORARY_MESSAGE_DURATION);
+	if (result === true) {
+		setTimeout(function() {
+			restartLoop();
+		}, TEMPORARY_MESSAGE_DURATION);
 
-	res.status(200).send();
-	return;
+		res.status(200).send({ message: "Showing temporary message:" + message });
+	} else {
+		res.status(500).send({ error: "Failed to show message :("});
+	}
 });
 
 router.get("/recurringMessages", function(req, res) {
 	console.log("GET /recurringMessages");
 	console.log(ipInfo(req));
-
 	res.status(200).json({
 		recurringMessages: recurringMessages
 	});
-	return;
 });
 
 router.post("/clear", function(req, res) {
 	console.log("POST /clear");
 	console.log(ipInfo(req));
-	res.status(200).send();
 	showMatrixAnimation();
 	recurringMessages = [];
 	restartLoop();
+	res.status(205).send({ message: "Cleared recurring messages" });
 });
 
 app.use(bodyParser.urlencoded({extended: false}));
@@ -247,7 +291,4 @@ app.listen(port);
 console.log("Server started on port", port);
 
 showMatrixAnimation();
-
-
-
 
