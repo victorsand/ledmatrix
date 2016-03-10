@@ -69,6 +69,18 @@ Returns a list of recurring messages.
 {
 	recurringMessages: [Array with the recurring messages currently on the server],
 }
+```
+
+### POST /clear
+Removes all recurring messages.
+
+#### Params:
+(none)
+
+### Returns (JSON):
+```
+200 OK
+```
 
 
 	

@@ -71,6 +71,9 @@ function restartLoop() {
 	clearInterval(recurringLoop);
 	recurringLoop = setInterval(loop, RECURRING_INTERVAL);
 	loop();
+	if (recurringMessages.length < 1) {
+		showMatrixAnimation();
+	}
 }
 
 function findRecurringMessageIndex(message) {
@@ -220,16 +223,24 @@ router.get("/recurringMessages", function(req, res) {
 	return;
 });
 
+router.post("/clear", function(req, res) {
+	console.log("POST /clear");
+	console.log(ipInfo(req));
+	res.status(200).send();
+	showMatrixAnimation();
+	recurringMessages = [];
+	restartLoop();
+});
 
 app.use(bodyParser.urlencoded({extended: false}));
-
-app.use("/", router);
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
+
+app.use("/", router);
 
 app.listen(port);
 
