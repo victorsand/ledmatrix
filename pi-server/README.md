@@ -17,7 +17,7 @@ Adds a message to the queue. The queue will loop all messages in turn until they
 #### Returns (JSON):
 ```
 {
-	id: [UUID of the message, used to remove message from the queue later],
+	id: [UUID of the added message, used to remove message from the queue later],
 	recurringMessages: [Array with the recurring messages currently on the server],
 	error: [Error message]
 }
@@ -36,6 +36,7 @@ Removes a specific message from the queue.
 ```
 {
 	recurringMessages: [Array with the recurring messages currently on the server],
+	error: [Error message]
 }
 ```
 
@@ -53,9 +54,11 @@ Shows a one-time message, and then goes back to looping recurring messages.
 ##### borderColor
 *[Required]* String with three RGB numbers, 0-7.
 
-#### Returns:
+#### Returns (JSON):
 ```
-200 OK
+{
+	error: [Error message]
+}
 ```
 
 ### GET /recurringMessages
@@ -68,6 +71,7 @@ Returns a list of recurring messages.
 ```
 {
 	recurringMessages: [Array with the recurring messages currently on the server],
+	error: [Error message]
 }
 ```
 
@@ -79,7 +83,9 @@ Removes all recurring messages.
 
 ### Returns (JSON):
 ```
-200 OK
+{
+	error: [Error message]
+}
 ```
 
 

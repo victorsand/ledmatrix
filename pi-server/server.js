@@ -181,7 +181,11 @@ router.post("/addRecurringMessage", function(req, res) {
 
 	if (!messageColor || !borderColor || !message) {
 		console.error("Param(s) missing");
-		res.status(400).send("Missing one or more paramers");
+		res.status(400).json({
+			id: null,
+			error: "Missing one or more paramers",
+			recurringMessages: recurringMessages
+		});
 		return;
 	}
 
@@ -194,7 +198,7 @@ router.post("/addRecurringMessage", function(req, res) {
 	}
 
 	if (!id) {
-		res.status(200).json({ 
+		res.status(400).json({ 
 			id: null,
 			error: "Message already exists", 
 			recurringMessages: recurringMessages
@@ -217,14 +221,18 @@ router.post("/removeRecurringMessage", function(req, res) {
 
 	if (!id) {
 		console.error("Id missing");
-		res.status(400).send("Id missing");
+		res.status(400).json({
+			error: "Id missing",
+			recurringMessages: recurringMessages
+		});
 		return;
 	}
 
 	removeRecurringMessage(id);
 
 	res.status(200).json({
-		recurringMessages: recurringMessages
+		recurringMessages: recurringMessages,
+		error: null
 	});
 });
 
@@ -253,9 +261,13 @@ router.post("/showTemporaryMessage", function(req, res) {
 			restartLoop();
 		}, TEMPORARY_MESSAGE_DURATION);
 
-		res.status(200).send({ message: "Showing temporary message:" + message });
+		res.status(200).send({ 
+			error: null
+		});
 	} else {
-		res.status(500).send({ error: "Failed to show message :("});
+		res.status(500).send({
+			error: "Failed to show message :("
+		});
 	}
 });
 
@@ -263,7 +275,8 @@ router.get("/recurringMessages", function(req, res) {
 	console.log("GET /recurringMessages");
 	console.log(ipInfo(req));
 	res.status(200).json({
-		recurringMessages: recurringMessages
+		recurringMessages: recurringMessages,
+		error: null
 	});
 });
 
@@ -273,7 +286,9 @@ router.post("/clear", function(req, res) {
 	showMatrixAnimation();
 	recurringMessages = [];
 	restartLoop();
-	res.status(205).send({ message: "Cleared recurring messages" });
+	res.status(205).send({
+		error: null
+	});
 });
 
 app.use(bodyParser.urlencoded({extended: false}));
