@@ -4,7 +4,7 @@ var exec = require("child_process").exec;
 var bodyParser = require("body-parser");
 var uuid = require("node-uuid");
 
-var port = 8080;
+var port = 3452;
 
 var router = express.Router();
 
@@ -53,18 +53,30 @@ var recurringMessages = [];
 
 var index = 0;
 var recurringLoop = setInterval(function() {
+	console.log("looping, index", index);
 	if (recurringMessages.length < 1) return;
 	showScrollingMessage(recurringMessages[index].messageColor,
 						 recurringMessages[index].borderColor,
 						 recurringMessages[index].message);
-	if (index++ > recurringMessages.length-1) {
+	if (++index > recurringMessages.length-1) {
+		console.log("resetting index");
 		index = 0;
 	}
+	console.log("no reset, index", index);
 }, RECURRING_INTERVAL);
 
 function findRecurringMessageIndex(message) {
 	for (var i=0; i<recurringMessages.length; i++) {
 		if (recurringMessages[i].message === message) {
+			return i;
+		}
+	}
+	return null;
+}
+
+function findRecurringMessageIndexById(id) {
+	for (var i=0; i<recurringMessages.length; i++) {
+		if (recurringMessages[i].id === id) {
 			return i;
 		}
 	}
@@ -88,7 +100,16 @@ function addRecurringMessage(messageColor, borderColor, message) {
 }
 
 function removeRecurringMessage(id) {
+	console.log("Removing message", id);
+	var index = findRecurringMessageIndexById(id);
+	if (index === null) {
+		console.log("Message does not exist");
+		return;
+	}
+	recurringMessages.splice(index, 1);
+	console.log("Removed message");
 	if (recurringMessages.length < 1) {
+		console.log("Removed last message");
 		showMatrixAnimation();
 	}
 }
@@ -101,7 +122,7 @@ function ipInfo(req) {
 }
 
 router.post("/addRecurringMessage", function(req, res) {
-	console.log("POST /add_recurringMessage");
+	console.log("POST /addRecurringMessage");
 	console.log(ipInfo(req));
 
 	var messageColor = req.param("messageColor") || req.body.messageColor;
@@ -110,7 +131,7 @@ router.post("/addRecurringMessage", function(req, res) {
 
 	if (!messageColor || !borderColor || !message) {
 		console.error("Param(s) missing");
-		res.status(500).send("Missing one or more paramers");
+		res.status(400).send("Missing one or more paramers");
 		return;
 	}
 
@@ -129,6 +150,26 @@ router.post("/addRecurringMessage", function(req, res) {
 		recurringMessages: recurringMessages,
 	});
 });
+
+router.post("/removeRecurringMessage", function(req, res) {
+	console.log("POST /removeRecurringMessage");
+	console.log(ipInfo(req));
+	
+	var id = req.param("id") || req.body.id;
+
+	if (!id) {
+		console.error("Id missing");
+		res.status(400).send("Id missing");
+		return;
+	}
+
+	removeRecurringMessage(id);
+
+	res.status(200).json({
+		recurringMessages: recurringMessages
+	});
+});
+
 
 router.post("/scrolling", function(req, res) {
 	console.log("POST /scrolling");
