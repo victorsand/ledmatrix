@@ -3,18 +3,20 @@
 
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script   src="https://code.jquery.com/jquery-2.2.2.min.js" integrity="sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI=" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="style.css">
 	<link href='https://fonts.googleapis.com/css?family=Fira+Sans:400,500,700,300|Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
 </head>
 
-<body>
-	<div class="container">
+<body ng-app="myApp">
+	<div class="container" ng-controller="MainController">
 		<div class="row">
 			<div class="col-md-12">
-				<h1>LED Matrix</h1>
+				<h1>{{ title }}</h1>
 			</div>
 		</div>
 		<div class="row">
@@ -36,16 +38,8 @@
 				<h2>Looping messages</h2>
 				<table class="table table-striped">
 					<tbody>
-						<tr>
-							<th>Build #233 failed</th>
-							<th><button type="button" class="btn btn-sm btn-warning"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></th>
-						</tr>
-						<tr>
-							<th>Lunch time!!1</th>
-							<th><button type="button" class="btn btn-sm btn-warning"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></th>
-						</tr>
-						<tr>
-							<th>Updated data warehouse</th>
+						<tr ng-repeat="message in recurringMessages">
+							<th>{{ message.message }}</th>
 							<th><button type="button" class="btn btn-sm btn-warning"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></th>
 						</tr>
 					</tbody>
@@ -60,6 +54,10 @@
 		</div>
 
 	</div>
+
+    <script src="app.js"></script>
+    <script src="MainController.js"></script>
+
 </body>
 
 </html>
