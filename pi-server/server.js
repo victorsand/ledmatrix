@@ -42,9 +42,11 @@ function showScrollingMessage(messageColor, borderColor, message) {
 		exec(params, function(error, stdout, stderr) {
 			if (stdout) {
 				console.log("stdout:", stdout);
+				return false;
 			}
 			if (stderr) {
 				console.log("stderr:", stderr);
+				return false;
 			}
 			if (error) {
 				console.error("exec error:", error);
@@ -66,9 +68,11 @@ function showMatrixAnimation() {
 		exec(params, function(error, stdout, stderr) {
 			if (stdout) {
 				console.log("stdout:", stdout);
+				return false;
 			}
 			if (stderr) {
 				console.log("stderr:", stderr);
+				return false;
 			}
 			if (error) {
 				console.error("exec error:", error);
@@ -154,7 +158,7 @@ function removeRecurringMessage(id) {
 	var index = findRecurringMessageIndexById(id);
 	if (index === null) {
 		console.log("Message does not exist");
-		return;
+		return false;
 	}
 	recurringMessages.splice(index, 1);
 	console.log("Removed message");
@@ -162,11 +166,12 @@ function removeRecurringMessage(id) {
 		console.log("Removed last message");
 		showMatrixAnimation();
 	}
+	return true;
 }
 
 function ipInfo(req) {
-	return req.headers['x-forwarded-for'] || 
-		req.connection.remoteAddress || 
+	return req.headers['x-forwarded-for'] ||
+		req.connection.remoteAddress ||
 		req.socket.remoteAddress ||
 		req.connection.socket.remoteAddress;
 }
@@ -198,9 +203,9 @@ router.post("/addRecurringMessage", function(req, res) {
 	}
 
 	if (!id) {
-		res.status(400).json({ 
+		res.status(400).json({
 			id: null,
-			error: "Message already exists", 
+			error: "Message already exists",
 			recurringMessages: recurringMessages
 		});
 		return;
@@ -216,7 +221,7 @@ router.post("/addRecurringMessage", function(req, res) {
 router.post("/removeRecurringMessage", function(req, res) {
 	console.log("POST /removeRecurringMessage");
 	console.log(ipInfo(req));
-	
+
 	var id = req.param("id") || req.body.id;
 
 	if (!id) {
@@ -228,7 +233,15 @@ router.post("/removeRecurringMessage", function(req, res) {
 		return;
 	}
 
-	removeRecurringMessage(id);
+	var removed = removeRecurringMessage(id);
+
+	if (removed !== true) {
+		res.status(400).json({
+			error: "Failed to remove message",
+			recurringMessages: recurringMessages
+		});
+		return;
+	}
 
 	res.status(200).json({
 		recurringMessages: recurringMessages,
@@ -261,7 +274,7 @@ router.post("/showTemporaryMessage", function(req, res) {
 			restartLoop();
 		}, TEMPORARY_MESSAGE_DURATION);
 
-		res.status(200).send({ 
+		res.status(200).send({
 			error: null
 		});
 	} else {
@@ -300,10 +313,10 @@ app.use(function(req, res, next) {
 });
 
 app.use("/", router);
+app.use("/dashboard", express.static("static"));
 
 app.listen(port);
 
-console.log("Server started on port", port);
-
 showMatrixAnimation();
 
+console.log("Matrix server started on port", port);
