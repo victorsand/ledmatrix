@@ -319,4 +319,4 @@ app.listen(port);
 
 showMatrixAnimation();
 
-console.log("Matrix server started on port", port);
+console.log("Server started on port", port);

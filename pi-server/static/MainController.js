@@ -6,26 +6,7 @@ app.controller("MainController", function($scope, $http) {
 	var getMessagesPath = "/recurringMessages";
 	var clearMessagesPath = "/clear";
 
-	$scope.recurringMessages = [
-		{
-			id: "abc123",
-			message: "The servers are burning",
-			messageColor: "777",
-			borderColor: "700"
-		},
-		{
-			id: "def456",
-			message: "Who's up for lunch?",
-			messageColor: "007",
-			borderColor: "777"
-		},
-		{
-			id: "ghi789",
-			message: "Help, stuck in bathroom",
-			messageColor: "707",
-			borderColor: "070"
-		}
-	];
+	$scope.recurringMessages = [];
 
 	function post(url, data, sucessCallback, errorCallback) {
 		$http({
@@ -86,6 +67,7 @@ app.controller("MainController", function($scope, $http) {
 		console.log("Removing message", message.message);
 		post(removeRecurringMessagePath, { id: message.id }, function success(response) {
 			console.log("Removed message successfully", response);
+			$scope.recurringMessages = response.data.recurringMessages;
 		}, function error(response) {
 			console.error("Error removing message", response);
 		});
@@ -101,5 +83,4 @@ app.controller("MainController", function($scope, $http) {
 	};
 
 	$scope.refreshMessages();
-
 });
