@@ -5,7 +5,6 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<script src="https://code.jquery.com/jquery-2.2.2.min.js" integrity="sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI=" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="style.css">
 	<link href='https://fonts.googleapis.com/css?family=Fira+Sans:400,500,700,300|Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
@@ -14,18 +13,57 @@
 
 <body ng-app="myApp">
 	<div class="container" ng-controller="MainController">
+
 		<div class="row">
-			<div class="col-md-12">
+			<div class="col-x2-12">
 				<h1>{{ title }}</h1>
 			</div>
 		</div>
+
 		<div class="row">
-			<div class="col-md-12">
+			<div class="col-xs-12">
 				<h2>Add a message</h2>
 				<div class="form-group">
 					<label for="messageInput" class="inputLabel">Message</label>
 					<input type="text" class="form-control" id="messageInput" placeholder="Message" ng-model="messageInput">
 				</div>
+			</div>
+		</div>
+
+		<div class="row colors">
+			<div class="col-xs-12">
+				<p class="color-header">Message color</p>
+			</div>
+		</div>
+
+		<div class="row colors">
+			<div class="col-xs-12">
+				<div class="btn-group">
+					<button type="button" ng-repeat="color in colors" id={{ color }} class="btn btn-{{ color }}" ng-click="selectMessageColor($index)">{{ color == colors[messageColorIndex] ? "X" : ""}}</button>
+				</div>
+			</div>
+		</div>
+
+		<br />
+
+		<div class="row colors">
+			<div class="col-xs-12">
+				<p class="color-header">Border color</p>
+			</div>
+		</div>
+
+		<div class="row colors">
+			<div class="col-xs-12">
+				<div class="btn-group">
+					<button type="button" ng-repeat="color in colors" id={{ color }} class="btn btn-{{ color }}" ng-click="selectBorderColor($index)">{{ color == colors[borderColorIndex] ? "X" : ""}}</button>
+				</div>
+			</div>
+		</div>
+
+		<br />
+
+		<div class="row">
+			<div class="col-xs-12">
 				<div class="btn-group">
 					<button type="button" class="btn btn-lg btn-primary" ng-click="showTemporaryMessage(messageInput)">Show once</button>
 					<button type="button" class="btn btn-lg btn-primary" ng-click="addRecurringMessage(messageInput)">Add to loop</button>
@@ -34,7 +72,7 @@
 		</div>
 
 		<div class="row">
-			<div class="col-md-12">
+			<div class="col-xs-12">
 				<h2>Looping messages</h2>
 				<table class="table table-striped">
 					<tbody>
@@ -49,7 +87,7 @@
 
 		<div class="row">
 			<div class="col-md-12">
-				<button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Clear all</button>
+				<button type="button" class="btn btn-danger" ng-click="clearMessages()"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Clear all</button>
 			</div>
 		</div>
 

@@ -8,6 +8,10 @@ app.controller("MainController", function($scope, $http) {
 
 	$scope.recurringMessages = [];
 
+	$scope.colors = ['777', '710', '770', '070', '077', '007', '107', '707', '700'];
+	$scope.messageColorIndex = 0;
+	$scope.borderColorIndex = 5;
+
 	function post(url, data, sucessCallback, errorCallback) {
 		$http({
 			method: "POST",
@@ -24,6 +28,16 @@ app.controller("MainController", function($scope, $http) {
 		}).then(successCallback, errorCallback);
 	};
 
+	$scope.selectBorderColor = function(index) {
+		console.log("Selecting border color", $scope.colors[index]);
+		$scope.borderColorIndex = index;
+	};
+
+	$scope.selectMessageColor = function(index) {
+		console.log("Selecting message color", $scope.colors[index]);
+		$scope.messageColorIndex = index;
+	};
+
 	$scope.refreshMessages = function() {
 		get(getMessagesPath, function success(response) {
 			console.log("Fetched messages", response);
@@ -38,8 +52,8 @@ app.controller("MainController", function($scope, $http) {
 		console.log("Adding recurring message:", message);
 		post(addRecurringMessagePath, {
 				message: message,
-				messageColor: "777",
-				borderColor: "007"
+				messageColor: $scope.colors[$scope.messageColorIndex],
+				borderColor: $scope.colors[$scope.borderColorIndex]
 		}, function success(response) {
 			console.log("Added recurring message", response);
 			$scope.recurringMessages = response.data.recurringMessages;
@@ -53,8 +67,8 @@ app.controller("MainController", function($scope, $http) {
 		console.log("Showing temporary message:", message);
 		post(showTemporaryMessagePath, {
 				message: message,
-				messageColor: "777",
-				borderColor: "007"
+				messageColor: $scope.colors[$scope.messageColorIndex],
+				borderColor: $scope.colors[$scope.borderColorIndex]
 		}, function success(response) {
 			console.log("Showing temporary message", response);
 		}, function error(response) {
@@ -75,10 +89,10 @@ app.controller("MainController", function($scope, $http) {
 
 	$scope.clearMessages = function() {
 		console.log("Clearing all messages");
-		post(clearMessagesPath, null, function success(response) {
+		post(clearMessagesPath, {}, function success(response) {
 			console.log("Cleared messages", response);
 		}, function error(response) {
-			console.error("Failed to clear messages", clear);
+			console.error("Failed to clear messages", response);
 		});
 	};
 
