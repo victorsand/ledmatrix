@@ -20,52 +20,52 @@ body {
 
 .btn-777, .btn-777:focus {
 	background-color: #fff;
-	color: #000;
+	color: #000 !important;
 }
 
 .btn-770, .btn-770:focus {
 	background-color: #ff0;
-	color: #000;
+	color: #000 !important;
 }
 
 .btn-710, .btn-710:focus {
 	background-color: #fa0;
-	color: #000;
+	color: #000 !important;
 }
 
 .btn-070, .btn-070:focus {
 	background-color: #0f0;
-	color: #000;
+	color: #000 !important;
 }
 
 .btn-077, .btn-077:focus {
 	background-color: #0ff;
-	color: #000;
+	color: #000 !important;
 }
 
 .btn-007, .btn-007:focus {
 	background-color: #00f;
-	color: #fff;
+	color: #fff !important;
 }
 
 .btn-107, .btn-107:focus {
 	background-color: #a0f;
-	color: #fff;
+	color: #fff !important;
 }
 
 .btn-707, .btn-707:focus {
 	background-color: #f0f;
-	color: #fff;
+	color: #fff !important;
 }
 
 .btn-701, .btn-701:focus {
 	background-color: #f0a;
-	color: #fff;
+	color: #fff !important;
 }
 
 .btn-700, .btn-700:focus {
 	background-color: #f00;
-	color: #fff;
+	color: #fff !important;
 }
 
 .color-header {
