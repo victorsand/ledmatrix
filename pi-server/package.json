@@ -4,6 +4,8 @@
   "dependencies": {
     "body-parser": "~1.15.0",
     "express": "~4.0.0",
-    "node-uuid": "^1.4.7"
+    "node-uuid": "^1.4.7",
+    "mocha": "~2.4.5",
+    "expect.js": "~0.3.1"
   }
 }
