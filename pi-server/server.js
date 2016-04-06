@@ -8,8 +8,8 @@ var port = 3452;
 var RECURRING_INTERVAL = 60 * 1000;
 var TEMPORARY_MESSAGE_DURATION = 60 * 1000;
 
-var utils = require("/modules/utils.js");
-var messageQueue = require("/modules/messageQueue.js")();
+var utils = require("./modules/utils.js");
+var messageQueue = require("./modules/messageQueue.js")();
 
 function buildMatrixAnimationParams() {
 	return "python ../pi-master/scrolling_message.py -matrix";
@@ -75,10 +75,10 @@ router.post("/addRecurringMessage", function(req, res) {
 
 	message = utils.cleanMessage(message);
 
-	var id = messageQueue.addRecurringMessage(messageColor, borderColor, message);
+	var id = messageQueue.addMessage(messageColor, borderColor, message);
 
 	if (messageQueue.getQueue().length == 1) {
-		queue.restartLoop(showScrollingMessage, showMatrixAnimation, RECURRING_INTERVAL);
+		messageQueue.restartLoop(showScrollingMessage, showMatrixAnimation, RECURRING_INTERVAL);
 	}
 
 	if (!id) {
@@ -110,7 +110,7 @@ router.post("/removeRecurringMessage", function(req, res) {
 		return;
 	}
 
-	var removed = messageQueue.removeRecurringMessage(id);
+	var removed = messageQueue.removeMessage(id);
 
 	if (removed !== true) {
 		res.status(400).json({
@@ -165,7 +165,7 @@ router.get("/recurringMessages", function(req, res) {
 	console.log("GET /recurringMessages");
 	console.log(utils.ipInfo(req));
 	res.status(200).json({
-		recurringMessages: queue.getQueue(),
+		recurringMessages: messageQueue.getQueue(),
 		error: null
 	});
 });
@@ -174,9 +174,9 @@ router.post("/clear", function(req, res) {
 	console.log("POST /clear");
 	console.log(utils.ipInfo(req));
 	showMatrixAnimation();
-	queue.clear();
-	queue.restartLoop(showScrollingMessage, showMatrixAnimation, RECURRING_INTERVAL);
-	res.status(205).send({
+	messageQueue.clear();
+	messageQueue.restartLoop(showScrollingMessage, showMatrixAnimation, RECURRING_INTERVAL);
+	res.status(200).json({
 		error: null
 	});
 });

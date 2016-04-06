@@ -2,7 +2,7 @@ import serial
 import sys
 import re
 
-ser = serial.Serial('/dev/ttyACM1', 9600)
+ser = serial.Serial('/dev/ttyACM0', 9600)
 
 if (sys.argv[1] == "-scroll"):
     print "Scrolling message"
