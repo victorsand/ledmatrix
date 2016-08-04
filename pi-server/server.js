@@ -6,7 +6,7 @@ var router = express.Router();
 var port = 3452;
 
 var RECURRING_INTERVAL = 60 * 1000;
-var TEMPORARY_MESSAGE_DURATION = 60 * 1000;
+var TEMPORARY_MESSAGE_DURATION = 120 * 1000;
 
 var utils = require("./modules/utils.js");
 var messageQueue = require("./modules/messageQueue.js")();
@@ -98,7 +98,7 @@ router.post("/addRecurringMessage", function(req, res) {
 
 router.post("/removeRecurringMessage", function(req, res) {
 	console.log("POST /removeRecurringMessage");
-	console.log(ipInfo(req));
+	console.log(utils.ipInfo(req));
 
 	var id = req.param("id") || req.body.id;
 
@@ -110,7 +110,7 @@ router.post("/removeRecurringMessage", function(req, res) {
 		return;
 	}
 
-	var removed = messageQueue.removeMessage(id);
+	var removed = messageQueue.removeMessage(id, showMatrixAnimation);
 
 	if (removed !== true) {
 		res.status(400).json({
@@ -149,7 +149,7 @@ router.post("/showTemporaryMessage", function(req, res) {
 
 	if (result === true) {
 		setTimeout(function() {
-			restartLoop();
+		messageQueue.restartLoop(showScrollingMessage, showMatrixAnimation, RECURRING_INTERVAL);
 		}, TEMPORARY_MESSAGE_DURATION);
 		res.status(200).send({
 			error: null

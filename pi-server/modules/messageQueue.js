@@ -74,6 +74,9 @@ var messageQueue = (function() {
 	};
 
 	var increaseIndex = function(showMessageCallback) {
+		console.log("increaseIndex");
+		console.log("queue.length", queue.length);
+		console.log("index", index);
 		if (queue.length < 1) {
 			return;
 		}
@@ -84,7 +87,8 @@ var messageQueue = (function() {
 		showMessageCallback(queue[index].messageColor,
 							queue[index].borderColor,
 							queue[index].message);
-		index = (index < queue.length) ? index + 1 : 0;
+		index = (index < queue.length-1) ? index + 1 : 0;
+		console.log("new index", index);
 	}
 
 	var getQueue = function() {

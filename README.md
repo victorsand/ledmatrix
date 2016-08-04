@@ -6,12 +6,12 @@ Display messages from a web server on an LED matrix, which is controlled by an A
 
 ### Dependencies
 
-Install Arduino dependencies (adjust sketchbook/libraries path if needed):
+Install Arduino dependencies. The libraries go either in the sketchbook folder (which can be set from the IDE preferences) or the Arduino folder, like below. Make sure to adjust folder name as necessary.
 
 ```
-git clone https://github.com/adafruit/RGB-matrix-Panel.git ~/sketchbook/libraries/RGBLEDMatrix && 
-git clone https://github.com/adafruit/Adafruit-GFX-Library.git ~/sketchbook/libraries/Adafruit_GFX &&
-git clone https://github.com/pfeerick/elapsedMillis.git ~/sketchbook/libraries/elapsedMillis
+git clone https://github.com/adafruit/RGB-matrix-Panel.git /opt/arduino-1.6.10/libraries/RGBLEDMatrix && 
+git clone https://github.com/adafruit/Adafruit-GFX-Library.git /opt/arduino-1.6.10/libraries/Adafruit_GFX &&
+git clone https://github.com/pfeerick/elapsedMillis.git /opt/arduino-1.6.10/libraries/elapsedMillis
 ```
 
 Download and install the PySerial library:
