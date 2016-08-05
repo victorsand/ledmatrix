@@ -1,3 +1,8 @@
+// Victor Sand
+// victor.sand@gmail.com
+// Project info: victorsand.com/ledmatrix
+// Code: github.com/victorsand/ledmatrix
+
 var express = require("express");
 var app = express();
 var exec = require("child_process").exec;

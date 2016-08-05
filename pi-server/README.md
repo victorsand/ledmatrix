@@ -1,4 +1,15 @@
+# Message queue API
 
+## Project info and demo
+[http://victorsand.com/ledmatrix](http://victorsand.com/ledmatrix)
+
+## Installation
+    npm install
+Problems with `node-gyp`? Try `npm install --unsafe-perm` as a workaround
+
+There are hardcoded parts (such as serial port) to change, sorry about that!
+
+## API
 
 ### POST /addRecurringMessage
 Adds a message to the queue. The queue will loop all messages in turn until they are removed.
@@ -89,4 +100,4 @@ Removes all recurring messages.
 ```
 
 
-	
+
