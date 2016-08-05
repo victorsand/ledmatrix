@@ -10,50 +10,16 @@ var TEMPORARY_MESSAGE_DURATION = 120 * 1000;
 
 var utils = require("./modules/utils.js");
 var messageQueue = require("./modules/messageQueue.js")();
-
-function buildMatrixAnimationParams() {
-	return "python ../pi-master/scrolling_message.py -matrix";
-}
-
-function buildScrollingMessageParams(messageColor, borderColor, message) {
-	return "python ../pi-master/scrolling_message.py -scroll " +
-		messageColor + " " + borderColor + " '" + message + "'";
-}
-
-function execute(params) {
-	try {
-		exec(params, function(error, stdout, stderr) {
-			if (stdout) {
-				console.log("stdout:", stdout);
-				return false;
-			}
-			if (stderr) {
-				console.log("stderr:", stderr);
-				return false;
-			}
-			if (error) {
-				console.error("exec error:", error);
-				return false;
-			}
-		});
-	} catch(e) {
-		console.log("Failed to execute");
-		console.log(e);
-		return false;
-	}
-	return true;
-}
+var serialComm = require("./modules/serialComm.js")();
 
 function showScrollingMessage(messageColor, borderColor, message) {
-	console.log("Showing scrolling message", message);
-	var params = buildScrollingMessageParams(messageColor, borderColor, message);
-	return execute(params);
+	console.log("Showing scrolling message:", message);
+	serialComm.showScrollingMessage(messageColor, borderColor, message);
 }
 
 function showMatrixAnimation() {
 	console.log("Showing Matrix animation");
-	var params = buildMatrixAnimationParams();
-	return execute(params);
+	serialComm.showMatrixAnimation();
 }
 
 router.post("/addRecurringMessage", function(req, res) {
@@ -68,7 +34,7 @@ router.post("/addRecurringMessage", function(req, res) {
 		console.error("Param(s) missing");
 		res.status(400).json({
 			id: null,
-			error: "Missing one or more paramers",
+			error: "Missing one or more parameters",
 		});
 		return;
 	}
@@ -190,10 +156,17 @@ app.use(function(req, res, next) {
 });
 
 app.use("/", router);
-app.use("/dashboard", express.static("static"));
+app.use("/dashboard", express.static("/home/matrix/code/ledmatrix/pi-server/static"));
 
 app.listen(port);
 
-showMatrixAnimation();
-
 console.log("Server started on port", port);
+
+// Wait for port to be ready (TODO make a callback instead)
+setTimeout(function() {
+	showScrollingMessage("555", "555", "Greetings");
+	setTimeout(function() {
+		showMatrixAnimation();
+	}, 10000);
+}, 5000);
+
