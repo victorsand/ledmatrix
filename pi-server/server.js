@@ -152,6 +152,18 @@ router.post("/clear", function(req, res) {
 	});
 });
 
+router.post("/restart", function(req, res) {
+	console.log("POST /restart");
+	exec("shutdown -r 0", function(error, stdout, sdterr) {
+	});
+});
+
+router.post("/shutdown", function(req, res) {
+	console.log("POST /shutdown");
+	exec("shutdown 0", function(error, stdout, sdterr) {
+	});
+});
+
 app.use(bodyParser.urlencoded({extended: false}));
 
 app.use(function(req, res, next) {

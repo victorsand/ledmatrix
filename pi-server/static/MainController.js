@@ -5,6 +5,8 @@ app.controller("MainController", function($scope, $http) {
 	var showTemporaryMessagePath = "/showTemporaryMessage"
 	var getMessagesPath = "/recurringMessages";
 	var clearMessagesPath = "/clear";
+	var restartPath = "/restart";
+	var shutdownPath = "/shutdown";
 
 	$scope.recurringMessages = [];
 
@@ -93,6 +95,24 @@ app.controller("MainController", function($scope, $http) {
 			console.log("Cleared messages", response);
 		}, function error(response) {
 			console.error("Failed to clear messages", response);
+		});
+	};
+
+	$scope.restart = function() {
+		console.log("Restarting");
+		post(restartPath, {}, function success(response) {
+			console.log("Restarting", response);
+		}, function error(response) {
+			console.error("Failed to restart", response);
+		});
+	};
+
+	$scope.shutdown= function() {
+		console.log("Shutting down");
+		post(shutdownPath, {}, function success(response) {
+			console.log("Shutting down", response);
+		}, function error(response) {
+			console.error("Failed to shut down", response);
 		});
 	};
 
